@@ -2,8 +2,9 @@ pipeline {
     environment {
         IMAGE_NAME = 'unit-testing'                // Docker 镜像名称，一般和项目名称相同
         CONTAINER_NAME = 'unit-testing'
-        DOCKER_ID = 'sqdd'
-        DOCKER_PASSWORD = 'csq010216'
+        // 确保已经在 Jenkins 中创建了这些凭证，且凭证 ID 是正确的
+        DOCKER_CREDENTIALS = 'docker-credentials'
+        SONARQUBE_CREDENTIALS = 'sonar_jenkins'
         POSTMAN_COLLECTION = '/home/local/project/pipeline/postman_collection.json'
         //POSTMAN_ENVIRONMENT = "/home/local/project/pipeline/postman_environment.json"
     }
@@ -41,10 +42,25 @@ pipeline {
 
         // 使用 SonarQube 进行代码分析
         stage('Code analysis with SonarQube') {
+        	  agent {
+                docker {
+                    image 'maven:3-alpine'
+                    args '-v /root/.m2:/root/.m2'
+                }
+            }
             steps {
                 echo '3. Code analysis with SonarQube'
-                withSonarQubeEnv('sonar') {
-                    sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=Myproject -Dsonar.projectName=unitesting -Dsonar.host.url=http://192.168.6.140:9000 -Dsonar.token=sqp_a96093cc9ec8a84834e29bfe1c0be6929d411f95'
+                withSonarQubeEnv('sonar') { // 'sonar' 值应匹配您在 Jenkins 配置的 SonarQube 服务器条目名
+                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                           mvn clean verify \
+                           sonar:sonar \
+                           -Dsonar.projectKey=Myproject \
+                           -Dsonar.projectName=unitesting \
+                           -Dsonar.host.url=http://192.168.6.140:9000 \
+                           -Dsonar.login=${SONAR_TOKEN}
+                        '''
+                    }
                 }
             }
         }
@@ -69,11 +85,14 @@ pipeline {
             agent any
             steps {
                 echo '5. Build Docker Image and then push to Docker server'
-                sh '''
-                    docker build -f Dockerfile -t ${DOCKER_ID}/${IMAGE_NAME}:latest .
-                    docker login -u ${DOCKER_ID} -p ${DOCKER_PASSWORD}
-                    docker push ${DOCKER_ID}/${IMAGE_NAME}:latest
-                '''
+                script {
+                    docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
+                        sh '''
+                            docker build -f Dockerfile -t ${IMAGE_NAME}:latest .
+                            docker push ${IMAGE_NAME}:latest
+                        '''
+                    }
+                }
             }
         }
 
@@ -82,11 +101,16 @@ pipeline {
             agent { label 'test001' }
             steps {
                 echo '6. Pull Docker image and run container in test environment'
-                sh '''
-                    docker login -u ${DOCKER_ID} -p ${DOCKER_PASSWORD}
-                    docker pull ${DOCKER_ID}/${IMAGE_NAME}:latest
-                    docker run --name ${IMAGE_NAME} -p 9001:9001 -d ${DOCKER_ID}/${IMAGE_NAME}:latest
-                '''
+                script {
+                    docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
+                        sh '''
+                            docker pull ${IMAGE_NAME}:latest
+                            docker stop ${CONTAINER_NAME} || true
+                            docker rm ${CONTAINER_NAME} || true
+                            docker run --name ${CONTAINER_NAME} -p 9001:9001 -d ${IMAGE_NAME}:latest
+                        '''
+                    }
+                }
             }
         }
 
@@ -97,7 +121,7 @@ pipeline {
                 echo '7. Run Build Verification Test in test environment'
                 sh '''
                     docker pull postman/newman
-                    docker run --rm --name newman --volumes-from ${CONTAINER_NAME} -d postman/newman run ${POSTMAN_COLLECTION} -e ${POSTMAN_ENVIRONMENT} -r cli
+                    docker run --rm --name newman -v ${POSTMAN_COLLECTION}:${POSTMAN_COLLECTION}:ro postman/newman run ${POSTMAN_COLLECTION} -r cli
                 '''
             }
         }

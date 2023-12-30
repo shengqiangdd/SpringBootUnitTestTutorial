@@ -1,0 +1,129 @@
+pipeline {
+    environment {
+        IMAGE_NAME = 'unit-testing'                // Docker 镜像名称，一般和项目名称相同
+        CONTAINER_NAME = 'unit-testing'
+        // 确保已经在 Jenkins 中创建了这些凭证，且凭证 ID 是正确的
+        DOCKER_CREDENTIALS = 'docker-credentials'
+        SONARQUBE_CREDENTIALS = 'sonar_jenkins'
+        POSTMAN_COLLECTION = '/home/local/project/pipeline/postman_collection.json'
+        //POSTMAN_ENVIRONMENT = "/home/local/project/pipeline/postman_environment.json"
+    }
+
+    agent any
+    stages {
+        // 从代码仓库拉取代码和用于流水线任务的 Jenkinsfile 和 Dockerfile
+        stage('Pull code') {
+            agent any
+            steps {
+                echo '1. Fetch code from Git'
+                checkout scm
+            }
+        }
+
+        // 执行单元测试及代码覆盖率分析，单元覆盖率要求为 70%，如果低于 70% 则构建失败
+        stage('Unit Test') {
+            agent {
+                docker {
+                    image 'maven:3-alpine' // 在流水线中启动 Maven
+                    args '-v /root/.m2:/root/.m2'
+                }
+            }
+            steps {
+                echo '2. Run unit test'
+                sh 'mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent test'
+                jacoco(changeBuildStatus: true, maximumLineCoverage: "70")
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        // 使用 SonarQube 进行代码分析
+        stage('Code analysis with SonarQube') {
+        	  agent {
+                docker {
+                    image 'maven:3-alpine'
+                    args '-v /root/.m2:/root/.m2'
+                }
+            }
+            steps {
+                echo '3. Code analysis with SonarQube'
+                withSonarQubeEnv('sonar') { // 'sonar' 值应匹配您在 Jenkins 配置的 SonarQube 服务器条目名
+                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                           mvn clean verify \
+                           sonar:sonar \
+                           -Dsonar.projectKey=Myproject \
+                           -Dsonar.projectName=unitesting \
+                           -Dsonar.host.url=http://192.168.6.140:9000 \
+                           -Dsonar.login=${SONAR_TOKEN}
+                        '''
+                    }
+                }
+            }
+        }
+
+        // 构建代码
+        stage('Build') {
+            agent {
+                docker {
+                    image 'maven:3-alpine'
+                    args '-v /root/.m2:/root/.m2'
+                }
+            }
+            steps {
+                echo '4. Make build package'
+                sh 'mvn -B -DskipTests clean package'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        // 创建 Docker 镜像并推送到 Docker 服务器
+        stage('Build Docker Image') {
+            agent any
+            steps {
+                echo '5. Build Docker Image and then push to Docker server'
+                script {
+                    docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
+                        sh '''
+                            docker build -f Dockerfile -t ${IMAGE_NAME}:latest .
+                            docker push ${IMAGE_NAME}:latest
+                        '''
+                    }
+                }
+            }
+        }
+
+        // 在测试服务器的节点拉取应用的镜像，创建并启动容器
+        stage('Deploy') {
+            agent { label 'test001' }
+            steps {
+                echo '6. Pull Docker image and run container in test environment'
+                script {
+                    docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
+                        sh '''
+                            docker pull ${IMAGE_NAME}:latest
+                            docker stop ${CONTAINER_NAME} || true
+                            docker rm ${CONTAINER_NAME} || true
+                            docker run --name ${CONTAINER_NAME} -p 9001:9001 -d ${IMAGE_NAME}:latest
+                        '''
+                    }
+                }
+            }
+        }
+
+        // 在测试服务器节点启动 Newman 容器并执行 BVT 测试
+        stage('Build Verification Test') {
+            agent { label 'test001' }
+            steps {
+                echo '7. Run Build Verification Test in test environment'
+                sh '''
+                    docker pull postman/newman
+                    docker run --rm --name newman -v ${POSTMAN_COLLECTION}:${POSTMAN_COLLECTION}:ro postman/newman run ${POSTMAN_COLLECTION} -r cli
+                '''
+            }
+        }
+    }
+}

@@ -10,6 +10,10 @@ pipeline {
     }
 
     agent any
+    tools {
+        // 接下来的 'jdk8' 应当匹配你在 Global Tool Configuration 中配置的 JDK 名称
+        jdk 'jdk8'
+    }
     stages {
         // 从代码仓库拉取代码和用于流水线任务的 Jenkinsfile 和 Dockerfile
         stage('Pull code') {

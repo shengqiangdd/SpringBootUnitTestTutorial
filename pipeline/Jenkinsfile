@@ -2,8 +2,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'unit-testing'                // Docker 镜像名称，一般和项目名称相同
         CONTAINER_NAME = 'unit-testing'
-        DOCKER_ID = 'sqdd'
-        DOCKER_PASSWORD = 'csq010216'
+        
         POSTMAN_COLLECTION = '/home/local/project/pipeline/postman_collection.json'
         //POSTMAN_ENVIRONMENT = "/home/local/project/pipeline/postman_environment.json"
     }

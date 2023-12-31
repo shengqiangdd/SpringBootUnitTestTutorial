@@ -11,7 +11,7 @@ pipeline {
 
     agent any
     tools {
-        maven 'mvn' // 在全局工具配置中设置的名称
+        maven 'Maven' // 在全局工具配置中设置的名称
     }
     stages {
         // 从代码仓库拉取代码和用于流水线任务的 Jenkinsfile 和 Dockerfile
@@ -46,14 +46,13 @@ pipeline {
         // 使用 SonarQube 进行代码分析
         stage('Code analysis with SonarQube') {
             steps {
-            	sh 'echo $JAVA_HOME'
     			sh 'java -version'
-    			sh '/usr/local/apache-maven-3.8.8/bin/mvn -v'
+    			sh 'mvn -v'
                echo '3. Code analysis with SonarQube'
                withSonarQubeEnv('sonar') {
                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
                        sh '''
-                           /usr/local/apache-maven-3.8.8/bin/mvn clean verify sonar:sonar \
+                           mvn clean verify sonar:sonar \
                            -Dsonar.projectKey=Myproject \
                            -Dsonar.projectName=unitesting \
                            -Dsonar.host.url=http://192.168.6.140:9000 \

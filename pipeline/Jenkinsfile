@@ -5,16 +5,14 @@ pipeline {
         // 确保已经在 Jenkins 中创建了这些凭证，且凭证 ID 是正确的
         DOCKER_CREDENTIALS = 'docker-credentials'
         SONARQUBE_CREDENTIALS = 'sonar_jenkins'
+        JAVA_HOME = tool 'jdk8' // 这里的 'jdk8' 应当匹配你在 Global Tool Configuration 中配置的 JDK 名称
+        MAVEN_HOME = tool 'mvn' // 使用 'mvn' 应当匹配你在 Global Tool Configuration 中配置的 Maven 名称
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
         POSTMAN_COLLECTION = '/home/local/project/pipeline/postman_collection.json'
         //POSTMAN_ENVIRONMENT = "/home/local/project/pipeline/postman_environment.json"
     }
 
     agent any
-    tools {
-        // 接下来的 'jdk8' 应当匹配你在 Global Tool Configuration 中配置的 JDK 名称
-        jdk 'jdk8'
-        maven 'mvn'
-    }
     stages {
         // 从代码仓库拉取代码和用于流水线任务的 Jenkinsfile 和 Dockerfile
         stage('Pull code') {

@@ -51,14 +51,17 @@ pipeline {
                 echo '3. Code analysis with SonarQube'
                 withSonarQubeEnv('sonar') { // 'sonar' 值应匹配您在 Jenkins 配置的 SonarQube 服务器条目名
                     withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
-                        sh '''
-                           mvn clean verify \
-                           sonar:sonar \
-                           -Dsonar.projectKey=Myproject \
-                           -Dsonar.projectName=unitesting \
-                           -Dsonar.host.url=http://192.168.6.140:9000 \
-                           -Dsonar.login=${SONAR_TOKEN}
-                        '''
+                    	script {
+                    		def mvnHome = tool 'mvn'
+	                    	sh '''
+	                           ${mvnHome}/bin/mvn clean verify \
+	                           sonar:sonar \
+	                           -Dsonar.projectKey=Myproject \
+	                           -Dsonar.projectName=unitesting \
+	                           -Dsonar.host.url=http://192.168.6.140:9000 \
+	                           -Dsonar.login=${SONAR_TOKEN}
+	                        '''
+                    	}
                     }
                 }
             }

@@ -46,12 +46,6 @@ pipeline {
 
         // 使用 SonarQube 进行代码分析
         stage('Code analysis with SonarQube') {
-        	  agent {
-                docker {
-                    image 'maven:3-alpine'
-                    args '-v /root/.m2:/root/.m2'
-                }
-            }
             steps {
                 echo '3. Code analysis with SonarQube'
                 withSonarQubeEnv('sonar') { // 'sonar' 值应匹配您在 Jenkins 配置的 SonarQube 服务器条目名

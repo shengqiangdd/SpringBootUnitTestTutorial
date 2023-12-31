@@ -10,6 +10,9 @@ pipeline {
     }
 
     agent any
+    tools {
+        maven 'mvn' // 在全局工具配置中设置的名称
+    }
     stages {
         // 从代码仓库拉取代码和用于流水线任务的 Jenkinsfile 和 Dockerfile
         stage('Pull code') {

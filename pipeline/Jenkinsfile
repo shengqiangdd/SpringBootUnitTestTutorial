@@ -112,7 +112,7 @@ pipeline {
                             docker pull ${USER_NAME}/${IMAGE_NAME}:latest
                             docker stop ${CONTAINER_NAME} || true
                             docker rm ${CONTAINER_NAME} || true
-                            docker run --name ${CONTAINER_NAME} -p 9001:9001 -d $${USER_NAME}/{IMAGE_NAME}:latest
+                            docker run --name ${CONTAINER_NAME} -p 9001:9001 -d ${USER_NAME}/{IMAGE_NAME}:latest
                         '''
                     }
                 }

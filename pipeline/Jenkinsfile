@@ -47,7 +47,7 @@ pipeline {
         stage('Code analysis with SonarQube') {
         	  agent {
         		docker {
-            		image 'maven:3.6-jdk-8' // 使用带有 JDK 的 Maven 镜像
+            		image 'maven:3.6-jdk-11' // 使用带有 JDK 的 Maven 镜像
             		args '-v /root/.m2:/root/.m2' // Maven 缓存持久化
         		}
     		  }

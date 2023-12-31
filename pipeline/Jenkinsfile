@@ -53,7 +53,7 @@ pipeline {
                withSonarQubeEnv('sonar') {
                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
                        sh '''
-                           mvn clean verify sonar:sonar \
+                           /usr/local/apache-maven-3.8.8/bin/mvn clean verify sonar:sonar \
                            -Dsonar.projectKey=Myproject \
                            -Dsonar.projectName=unitesting \
                            -Dsonar.host.url=http://192.168.6.140:9000 \

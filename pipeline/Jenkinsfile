@@ -33,6 +33,8 @@ pipeline {
                 }
             }
             steps {
+            	 sh 'java -version'
+    			 sh 'mvn -v'
                 echo '2. Run unit test'
                 sh 'mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent test'
                 jacoco(changeBuildStatus: true, maximumLineCoverage: "70")

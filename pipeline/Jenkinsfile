@@ -87,6 +87,10 @@ pipeline {
             agent any
             steps {
                 echo '5. Build Docker Image and then push to Docker server'
+                echo '检查当前目录'
+                sh 'ls -la' // 列出当前工作目录下的文件，确保有 Dockerfile
+
+                echo '构建 Docker 镜像'
                 script {
                     docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
                         sh '''

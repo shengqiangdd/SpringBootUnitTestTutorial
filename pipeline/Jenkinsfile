@@ -10,10 +10,6 @@ pipeline {
     }
 
     agent any
-    tools {
-        maven 'Maven3' // 在全局工具配置中设置的名称
-        jdk 'JDK8' // 在全局工具配置中设置的名称
-    }
     stages {
         // 从代码仓库拉取代码和用于流水线任务的 Jenkinsfile 和 Dockerfile
         stage('Pull code') {
@@ -36,7 +32,6 @@ pipeline {
                 echo '2. Run unit test'
                 sh '''
         			export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
-        			echo "Using JAVA_HOME=${JAVA_HOME}"
         			mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent test
         		 '''
                 jacoco(changeBuildStatus: true, maximumLineCoverage: "70")
@@ -50,9 +45,13 @@ pipeline {
 
         // 使用 SonarQube 进行代码分析
         stage('Code analysis with SonarQube') {
+        	  agent {
+        		docker {
+            		image 'maven:3.6-jdk-8' // 使用带有 JDK 的 Maven 镜像
+            		args '-v /root/.m2:/root/.m2' // Maven 缓存持久化
+        		}
+    		  }
             steps {
-    			sh 'java -version'
-    			sh 'mvn -v'
                echo '3. Code analysis with SonarQube'
                withSonarQubeEnv('sonar') {
                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {

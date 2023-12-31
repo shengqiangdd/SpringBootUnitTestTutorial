@@ -48,7 +48,7 @@ pipeline {
             steps {
             	sh 'echo $JAVA_HOME'
     			sh 'java -version'
-    			sh 'mvn -v'
+    			sh '/usr/local/apache-maven-3.8.8/bin/mvn -v'
                echo '3. Code analysis with SonarQube'
                withSonarQubeEnv('sonar') {
                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {

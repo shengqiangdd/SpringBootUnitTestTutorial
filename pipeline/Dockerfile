@@ -1,5 +1,5 @@
 # 指定以openjdk：8-jre-alpine为基础镜像，来构建此镜像
-FROM openjdk:8- jdk- alpine
+FROM openjdk:8-jdk-alpine
 # RUN用于容器内部执行命令
 RUN mkdir -p /usr/local/project
 # 指定容器的目录，容器启动时执行的命令会在该目录下执行

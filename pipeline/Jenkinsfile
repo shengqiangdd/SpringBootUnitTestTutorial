@@ -1,10 +1,11 @@
 pipeline {
     environment {
         IMAGE_NAME = 'unit-testing'                // Docker 镜像名称，一般和项目名称相同
+        USER_NAME = 'sqdd'                // docker hub用户
         CONTAINER_NAME = 'unit-testing'
         // 确保已经在 Jenkins 中创建了这些凭证，且凭证 ID 是正确的
-        DOCKER_CREDENTIALS = 'docker-credentials'
-        SONARQUBE_CREDENTIALS = 'sonar_jenkins'
+        DOCKER_CREDENTIALS = 'docker-credentials'	// docker用户名密码凭证
+        SONARQUBE_CREDENTIALS = 'sonar_jenkins'	// sonar user_token 凭证
         POSTMAN_COLLECTION = '/home/local/project/pipeline/postman_collection.json'
         //POSTMAN_ENVIRONMENT = "/home/local/project/pipeline/postman_environment.json"
     }
@@ -89,13 +90,11 @@ pipeline {
                 echo '5. Build Docker Image and then push to Docker server'
                 echo '检查当前目录'
                 sh 'ls -la' // 列出当前工作目录下的文件，确保有 Dockerfile
-
-                echo '构建 Docker 镜像'
                 script {
-                    docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
+                    docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
                         sh '''
                             docker build -f Dockerfile -t ${IMAGE_NAME}:latest .
-                            docker push ${IMAGE_NAME}:latest
+                            docker push ${USER_NAME}/${IMAGE_NAME}:latest
                         '''
                     }
                 }
@@ -108,9 +107,9 @@ pipeline {
             steps {
                 echo '6. Pull Docker image and run container in test environment'
                 script {
-                    docker.withRegistry('', "${DOCKER_CREDENTIALS}") {
+                    docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
                         sh '''
-                            docker pull ${IMAGE_NAME}:latest
+                            docker pull ${USER_NAME}/${IMAGE_NAME}:latest
                             docker stop ${CONTAINER_NAME} || true
                             docker rm ${CONTAINER_NAME} || true
                             docker run --name ${CONTAINER_NAME} -p 9001:9001 -d ${IMAGE_NAME}:latest

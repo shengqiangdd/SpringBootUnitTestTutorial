@@ -50,7 +50,7 @@ pipeline {
                 withSonarQubeEnv('sonar') { // 'sonar' 值应匹配您在 Jenkins 配置的 SonarQube 服务器条目名
                     withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
                     	sh '''
-	                           mvn clean verify \
+	                           ${MAVEN_HOME}/bin/mvn clean verify \
 	                           sonar:sonar \
 	                           -Dsonar.projectKey=Myproject \
 	                           -Dsonar.projectName=unitesting \

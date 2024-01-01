@@ -120,6 +120,17 @@ pipeline {
                             docker rm ${CONTAINER_NAME} || true
                             docker run --name ${CONTAINER_NAME} --network my-network -p 9001:9001 -d ${USER_NAME}/${IMAGE_NAME}:latest
                         """
+                        def ready = false
+                        for (int i = 0; i < 10; i++) {
+                            if (sh(script: "nc -z ${CONTAINER_NAME} 9001", returnStatus: true) == 0) {
+                                ready = true
+                                break
+                            }
+                            sleep 6
+                        }
+                        if (!ready) {
+                            error("容器未准备就绪")
+                        }
                     }
                 }
             }

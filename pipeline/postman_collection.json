@@ -9,7 +9,18 @@
 			"name": "todo",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9001/todo",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9001",
+					"path": [
+						"todo"
+					]
+				}
 			},
 			"response": []
 		},

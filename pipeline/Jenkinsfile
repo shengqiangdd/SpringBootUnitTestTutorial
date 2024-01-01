@@ -130,7 +130,7 @@ pipeline {
                 //sh 'export POSTMAN_ENVIRONMENT = pipeline/postman_environment.json'
                 script {
             			def PostmanCollectionPath = "pipeline/postman_collection.json" // 设置相对路径
-            			echo "path: ${WORKSPACE}/${postmanCollectionPath}"
+            			echo "path: ${WORKSPACE}/${PostmanCollectionPath}"
             			sh '''
                     		docker pull postman/newman
                     		docker run --rm --name newman -v ${WORKSPACE}/${PostmanCollectionPath}:/tmp/collection.json:ro postman/newman run /tmp/collection.json -r cli

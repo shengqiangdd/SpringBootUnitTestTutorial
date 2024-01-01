@@ -108,13 +108,17 @@ pipeline {
                 echo '6. Pull Docker image and run container in test environment'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
+                        // 检查网络是否存在
+                        def networkExists = sh(script: "docker network ls | grep -w my-network", returnStatus: true) == 0
+                        if (!networkExists) {
+                            // 如果网络不存在，则创建
+                            sh "docker network create my-network"
+                        }
                         sh """
-                        	docker network create my-network || true
                             docker pull ${USER_NAME}/${IMAGE_NAME}:latest
                             docker stop ${CONTAINER_NAME} || true
                             docker rm ${CONTAINER_NAME} || true
                             docker run --name ${CONTAINER_NAME} --network my-network -p 9001:9001 -d ${USER_NAME}/${IMAGE_NAME}:latest
-                            docker exec -it ${CONTAINER_NAME} /bin/sh
                             curl http://unit-testing:9001/todo
                         """
                     }

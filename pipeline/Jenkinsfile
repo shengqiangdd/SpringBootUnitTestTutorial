@@ -137,8 +137,6 @@ pipeline {
             			sh """
                     		docker pull postman/newman
                     		docker run --rm --name newman --network my-network -v ${WORKSPACE}/${PostmanCollectionPath}:/tmp/collection.json:ro postman/newman run /tmp/collection.json -r cli
-                            docker exec -it newman /bin/sh
-                            curl http://unit-testing:9001/todo
                 		"""
             	 }
             }

@@ -126,12 +126,16 @@ pipeline {
                 echo '7. Run Build Verification Test in test environment'
                 echo '检查当前目录'
                 sh 'ls -la'
-                sh 'export POSTMAN_COLLECTION = pipeline/postman_collection.json'
+                //sh 'export POSTMAN_COLLECTION = pipeline/postman_collection.json'
                 //sh 'export POSTMAN_ENVIRONMENT = pipeline/postman_environment.json'
-                sh '''
-                    docker pull postman/newman
-                    docker run --rm --name newman -v ${POSTMAN_COLLECTION}:${POSTMAN_COLLECTION}:ro postman/newman run ${POSTMAN_COLLECTION} -r cli
-                '''
+                script {
+            			def PostmanCollectionPath = "pipeline/postman_collection.json" // 设置相对路径
+            			echo 'path: ${WORKSPACE}/${postmanCollectionPath}'
+            			sh '''
+                    		docker pull postman/newman
+                    		docker run --rm --name newman -v ${WORKSPACE}/${postmanCollectionPath}:/tmp/collection.json:ro postman/newman run /tmp/collection.json -r cli
+                		'''
+            	 }
             }
         }
     }

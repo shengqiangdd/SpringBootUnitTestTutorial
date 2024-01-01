@@ -11,10 +11,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://uni-testing:9001/todo",
+					"raw": "http://unit-testing:9001/todo",
 					"protocol": "http",
 					"host": [
-						"uni-testing"
+						"unit-testing"
 					],
 					"port": "9001",
 					"path": [
@@ -30,10 +30,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://uni-testing:9001/todo/2",
+					"raw": "http://unit-testing:9001/todo/2",
 					"protocol": "http",
 					"host": [
-						"uni-testing"
+						"unit-testing"
 					],
 					"port": "9001",
 					"path": [

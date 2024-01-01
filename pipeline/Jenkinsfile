@@ -29,10 +29,10 @@ pipeline {
             }
             steps {
                 echo '2. Run unit test'
-                sh """
+                sh '''
         			export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
         			mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent test
-        		 """
+        		 '''
                 jacoco(changeBuildStatus: true, maximumLineCoverage: "70")
             }
             post {
@@ -54,13 +54,13 @@ pipeline {
                echo '3. Code analysis with SonarQube'
                withSonarQubeEnv('sonar') {
                    withCredentials([string(credentialsId: "${SONARQUBE_CREDENTIALS}", variable: 'SONAR_TOKEN')]) {
-                       sh """
+                       sh '''
                            mvn clean verify sonar:sonar \
                            -Dsonar.projectKey=Myproject \
                            -Dsonar.projectName=unitesting \
                            -Dsonar.host.url=http://192.168.6.140:9000 \
                            -Dsonar.login=${SONAR_TOKEN}
-                       """
+                       '''
                    }
                }
             }

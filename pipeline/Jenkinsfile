@@ -6,8 +6,6 @@ pipeline {
         // 确保已经在 Jenkins 中创建了这些凭证，且凭证 ID 是正确的
         DOCKER_CREDENTIALS = 'docker-credentials'	// docker用户名密码凭证
         SONARQUBE_CREDENTIALS = 'sonar_jenkins'	// sonar user_token 凭证
-        POSTMAN_COLLECTION = '/home/local/project/pipeline/postman_collection.json'
-        //POSTMAN_ENVIRONMENT = "/home/local/project/pipeline/postman_environment.json"
     }
 
     agent any
@@ -128,6 +126,8 @@ pipeline {
                 echo '7. Run Build Verification Test in test environment'
                 echo '检查当前目录'
                 sh 'ls -la'
+                sh 'export POSTMAN_COLLECTION = pipeline/postman_collection.json'
+                //sh 'export POSTMAN_ENVIRONMENT = pipeline/postman_environment.json'
                 sh '''
                     docker pull postman/newman
                     docker run --rm --name newman -v ${POSTMAN_COLLECTION}:${POSTMAN_COLLECTION}:ro postman/newman run ${POSTMAN_COLLECTION} -r cli

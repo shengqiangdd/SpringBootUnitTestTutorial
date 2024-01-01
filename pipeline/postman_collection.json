@@ -14,7 +14,7 @@
 					"raw": "http://unit-testing:9001/todo",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"unit-testing"
 					],
 					"port": "9001",
 					"path": [
@@ -33,7 +33,7 @@
 					"raw": "http://unit-testing:9001/todo/2",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"unit-testing"
 					],
 					"port": "9001",
 					"path": [

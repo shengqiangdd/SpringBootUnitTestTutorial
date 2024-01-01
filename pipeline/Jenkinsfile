@@ -109,10 +109,11 @@ pipeline {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
                         sh """
+                        	    docker network create my-network || true
                             docker pull ${USER_NAME}/${IMAGE_NAME}:latest
                             docker stop ${CONTAINER_NAME} || true
                             docker rm ${CONTAINER_NAME} || true
-                            docker run --name ${CONTAINER_NAME} -p 9001:9001 -d ${USER_NAME}/${IMAGE_NAME}:latest
+                            docker run --name ${CONTAINER_NAME} --network my-network -p 9001:9001 -d ${USER_NAME}/${IMAGE_NAME}:latest
                         """
                     }
                 }
@@ -133,7 +134,7 @@ pipeline {
             			echo "path: ${WORKSPACE}/${PostmanCollectionPath}"
             			sh """
                     		docker pull postman/newman
-                    		docker run --rm --name newman -v ${WORKSPACE}/${PostmanCollectionPath}:/tmp/collection.json:ro postman/newman run /tmp/collection.json -r cli
+                    		docker run --rm --name newman --network my-network -v ${WORKSPACE}/${PostmanCollectionPath}:/tmp/collection.json:ro postman/newman run /tmp/collection.json -r cli
                 		"""
             	 }
             }

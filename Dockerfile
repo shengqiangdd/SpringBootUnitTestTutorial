@@ -11,4 +11,4 @@ COPY pipeline/*.json ./pipeline/
 # 暴露容器端口为9001 Docker 镜像告知Docker宿主机应用监听了9001端口
 EXPOSE 9001
 # 容器启动时执行的命令
-ENTRYPOINT ["java","-jar","--server.port=9001","unit-testing-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "unit-testing-0.0.1-SNAPSHOT.jar", "--server.port=9001"]

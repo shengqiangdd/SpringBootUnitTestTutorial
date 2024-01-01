@@ -90,7 +90,7 @@ pipeline {
                 echo '5. Build Docker Image and then push to Docker server'
                 echo '检查当前目录'
                 sh 'ls -la' // 列出当前工作目录下的文件，确保有 Dockerfile
-                echoh 'repo:${USER_NAME}/${IMAGE_NAME}:latest'
+                echo 'repo:${USER_NAME}/${IMAGE_NAME}:latest'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
                         sh '''

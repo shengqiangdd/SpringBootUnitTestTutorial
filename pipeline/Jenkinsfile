@@ -2,7 +2,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'unit-testing'                // Docker 镜像名称，一般和项目名称相同
         USER_NAME = 'sqdd'                // docker hub用户
-        CONTAINER_NAME = 'unit-testing'
+        CONTAINER_NAME = 'unit-testing' //容器运行指定名称  跟postman_collection里请求url_host: unit-testing对应
         // 确保已经在 Jenkins 中创建了这些凭证，且凭证 ID 是正确的
         DOCKER_CREDENTIALS = 'docker-credentials'	// docker用户名密码凭证
         SONARQUBE_CREDENTIALS = 'sonar_jenkins'	// sonar user_token 凭证

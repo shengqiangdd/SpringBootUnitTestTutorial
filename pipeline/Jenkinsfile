@@ -109,7 +109,7 @@ pipeline {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
                         sh """
-                        	    docker network create my-network || true
+                        	docker network create my-network || true
                             docker pull ${USER_NAME}/${IMAGE_NAME}:latest
                             docker stop ${CONTAINER_NAME} || true
                             docker rm ${CONTAINER_NAME} || true

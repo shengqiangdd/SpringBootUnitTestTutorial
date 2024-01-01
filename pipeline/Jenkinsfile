@@ -90,13 +90,14 @@ pipeline {
                 echo '5. Build Docker Image and then push to Docker server'
                 echo '检查当前目录'
                 sh 'ls -la' // 列出当前工作目录下的文件，确保有 Dockerfile
-                echo 'repo:${USER_NAME}/${IMAGE_NAME}:latest'
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
-                        sh '''
-                            docker build -f Dockerfile -t ${USER_NAME}/${IMAGE_NAME}:latest .
-                            docker push ${USER_NAME}/${IMAGE_NAME}:latest
-                        '''
+                	// 使用 Credentials Binding 插件绑定 Docker 凭证
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    	// 登录 Docker
+                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                        // 构建和推送 Docker 镜像
+                        sh "docker build -f Dockerfile -t ${USER_NAME}/${IMAGE_NAME}:latest ."
+                        sh "docker push ${USER_NAME}/${IMAGE_NAME}:latest"
                     }
                 }
             }
@@ -107,7 +108,6 @@ pipeline {
             agent { label 'test001' }
             steps {
                 echo '6. Pull Docker image and run container in test environment'
-                echo 'repo:${USER_NAME}/${IMAGE_NAME}:latest'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS}") {
                         sh '''
